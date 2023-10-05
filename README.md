@@ -43,3 +43,15 @@ Some large amounts of data are missing because of privacy issues. here is a list
 
 
 ### 5. Data Cleaning
+
+The cleaning script used for the data can be found [here](R/clean_congress_data.R).
+
+The script pulls the raw data and saves the new tables to the `data` folder.
+
+Here is a list of changes made to the raw data:
+
+- removes 8 rows of corrupted data.
+- changes some party names for consistency.
+- creates a new table for session characteristics. in the raw data, session
+characteristics are saved in every row, which is unnecessary. Session characteristics 
+are moved into a new table, `session_data`.
