@@ -64,6 +64,12 @@ congress_data%>%
 
 ```
 
+```{r}
+congress_data %>%
+  filter(!is.na(medianIncome)) %>%
+  select(congNum) %>%
+  distinct()
+```
 
 
 
