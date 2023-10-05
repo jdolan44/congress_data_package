@@ -1,0 +1,32 @@
+{
+    "id": "F4C4D69B",
+    "path": "~/GitHub/congress_data_package/congress_data_notebook.qmd",
+    "project_path": "congress_data_notebook.qmd",
+    "type": "quarto_markdown",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1696391157191.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "rmdVisualMode": "false",
+        "rmdVisualWrapConfigured": "true",
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "26,0",
+        "scrollLine": "19",
+        "docOutlineVisible": "1",
+        "rmdVisualCollapsedChunks": "",
+        "rmdVisualModeLocation": "2:0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1696519436,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1696519436839,
+    "read_only": false,
+    "read_only_alternatives": []
+}

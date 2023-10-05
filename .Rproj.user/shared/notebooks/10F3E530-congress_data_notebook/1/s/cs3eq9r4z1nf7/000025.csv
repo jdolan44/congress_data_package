@@ -1,0 +1,5 @@
+"0","congress_data_raw %>%"
+"0","  filter(party==""Republican-Conservative"")$party <- ""Republican"""
+"2","Error in congress_data_raw %>% filter(party == ""Republican-Conservative"")$party <- ""Republican"" : 
+  could not find function ""%>%<-""
+"

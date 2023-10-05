@@ -1,0 +1,69 @@
+---
+title: "Congress Data Package"
+author: "JTD"
+format: html
+editor: visual
+---
+
+
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+
+library(tidyverse)
+library(ggthemes)
+
+theme_set(theme_minimal(base_size = 12))
+```
+
+## Raw Data
+
+the raw data was obtained from 
+[this site](https://congressdata.joshuamccrain.com/).
+It was published in 2016 by Ella Foster-Molina, affiliated with the University of Rochester
+It contains information about each congressional district from years 1972-2013, as well as personal characteristics of the house member representing that district.
+This dataset was likely created for use in research papers.
+
+More information about the dataset can be found [here](codebook.pdf).
+
+let's load the data:
+```{r}
+congress_data_raw <- read_csv("data/allCongressDataPublishV2.csv")
+```
+
+```{r}
+glimpse(congress_data_raw)
+```
+
+```{r}
+congress_data %>%
+  ggplot(aes(x=region)) +
+  geom_bar()
+```
+
+```{r}
+congress_data_raw %>%
+  filter(party=="Republican-Conservative")
+```
+```{r}
+congress_data_raw %>%
+  filter(is.na(congNum))
+```
+
+```{r}
+#save this as a new table!
+congress_data_raw %>%
+  group_by(congNum, partyControl, demSeats, repSeats, otherSeats) %>%
+  summarise()
+```
+```{r}
+congress_data%>%
+  filter(sponID==406746) %>%
+  select(party)
+
+```
+
+
+
+

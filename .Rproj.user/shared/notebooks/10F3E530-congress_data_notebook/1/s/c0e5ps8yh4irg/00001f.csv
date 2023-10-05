@@ -1,0 +1,5 @@
+"0","#save this as a new table!"
+"0","congress_data_raw %>%"
+"0","  group_by(congNum, partyControl, demSeats, repSeats, otherSeats) %>%"
+"0","  summarise()"
+"2","`summarise()` has grouped output by 'congNum', 'partyControl', 'demSeats', 'repSeats'. You can override using the `.groups` argument."
