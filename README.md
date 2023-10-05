@@ -1,2 +1,6 @@
-# congress_data_package
- data package for DS201 semester project.
+# Congress Data Package
+ Author: JTD
+ Description: data package for DS201 semester project.
+ 
+ ## Data Sheet
+ 

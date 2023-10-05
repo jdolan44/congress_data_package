@@ -2,3 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
+*.pper
+.Rproj.user/B9648E16/sources/prop/INDEX
