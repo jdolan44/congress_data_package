@@ -21,4 +21,4 @@ All data for this project is formatted in CSV files.
 
 ### 3. Data Structure
 
-All data is tabular. the `congress_data` table has _ rows and _ columns. The `session_data` table has _ rows and _ columns.
+All data is tabular. the `congress_data` table has 9,405 rows and 72 columns. The `session_data` table has 21 rows and 5 columns.

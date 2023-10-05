@@ -1,3 +1,7 @@
+library(tidyverse)
+library(ggthemes)
+
+theme_set(theme_minimal(base_size = 12))
 
 # read from the raw data file.
 congress_data <- read_csv("raw_data/allCongressDataPublishV2.csv")
