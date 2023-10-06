@@ -1,3 +1,0 @@
-"0","congress_data %>%"
-"0","  ggplot(aes(x=region)) +"
-"0","  geom_bar()"

@@ -37,6 +37,10 @@ congress_data $demSeats <- NULL
 congress_data $repSeats <- NULL
 congress_data $otherSeats <-NULL
 
+#drop prcntWhite and replace it with prcntWhiteAll
+congress_data$prcntWhite <- NULL
+congress_data <- rename(congress_data, prcntWhite = "prcntWhiteAll")
+
 #save tables to data folder
 
 write_csv(congress_data, "data/congress_data.csv")

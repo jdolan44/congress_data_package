@@ -21,7 +21,8 @@ All data for this project is formatted in CSV files.
 
 ### 3. Data Structure
 
-All data is tabular. the `congress_data` table has 9,405 rows and 72 columns. The `session_data` table has 21 rows and 5 columns.
+All data is tabular. the `congress_data` table has 9,405 rows and 72 columns. The `session_data` table has 21 rows and 5 columns. More details on each column 
+can be found in the (codebook)[raw_data/codebook.pdf].
 
 ### 4. Data Issues
 
@@ -40,6 +41,8 @@ Some large amounts of data are missing because of privacy issues. here is a list
 - abroadPrcnt (98-113)
 - meanIncome (98-113)
 - medianIncome (98-113)
+- cookLeanDem (109-113)
+- prcntBlackNotHisp (98-113)
 
 
 ### 5. Data Cleaning
@@ -55,3 +58,4 @@ Here is a list of changes made to the raw data:
 - creates a new table for session characteristics. in the raw data, session
 characteristics are saved in every row, which is unnecessary. Session characteristics 
 are moved into a new table, `session_data`.
+- updates prcntWhite to be one column with the complete data available.

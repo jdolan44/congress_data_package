@@ -38,7 +38,7 @@ glimpse(congress_data_raw)
 
 ```{r}
 congress_data %>%
-  ggplot(aes(x=region)) +
+  ggplot(aes(x=congNum, group=prcntWhite, fill=prcntWhite,)) +
   geom_bar()
 ```
 
@@ -66,10 +66,14 @@ congress_data%>%
 
 ```{r}
 congress_data %>%
-  filter(!is.na(medianIncome)) %>%
+  filter(!is.na(prcntBlackNotHisp)) %>%
   select(congNum) %>%
   distinct()
 ```
 
+```{r}
+congress_data %>%
+  select(prcntWhite)
+```
 
 
