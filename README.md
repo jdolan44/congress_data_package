@@ -2,6 +2,14 @@
  Author: JTD
  
  Description: data package for DS201 semester project.
+
+##File Description:
+
+The Exploratory Data Analysis for this project can be found [here](congress_data_EDA.qmd).
+
+All raw, uncleaned data can be found in the [raw_data](./raw_data) folder. The cleaned data can be found in the [data](./data) folder. The cleaning script for this data set can be found [here](./R/clean_congress_data.R).
+
+
  
  ## Data Sheet
  
