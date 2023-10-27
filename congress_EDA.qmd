@@ -38,6 +38,7 @@ congress_data %>%
 ```
 The party distribution does not seem to have a general trend over time.
 
+***
 
 Next, let's look at the gender distribution.
 ```{r}
@@ -56,6 +57,7 @@ congress_data %>%
 ```
 It is clear that congress has always been majority male, but the number of female representatives has clearly increased over time.
 
+***
 
 Next, let's look at the number of Black and Hispanic representatives over time.
 ```{r}
@@ -81,6 +83,8 @@ num_black / num_hispanic
 ```
 It's clear that the number of Black and Hispanic representatives has increased over time. Most Black and Hispanic representatives tend to be Democratic, which is to be expected. It also seems that Hispanic representatives have a higher likelihood to be Republican than Black representatives do. 
 
+***
+
 Now let's look at how the age of congress changes over time.
 
 ```{r}
@@ -93,6 +97,8 @@ congress_data %>%
   labs(x="Congress Number",y="Age")
 ```
 Surprisingly, the average age of congress seems to have gone up slightly over time. This could be because it has become more difficult for younger people to get involved in politics.
+
+***
 
 Next, let's look at how the number of terms a senator has served may affect the number of bills they sponsor and/or pass.
 
@@ -132,6 +138,8 @@ congress_data %>%
 ```
 The plot for pass percentage seems to have an increase and decrease similar to the number of bills sponsored. However, it does not seem as obvious why pass percentage would decrease for older representatives.
 
+***
+
 Now let's compare these statistics to different age groups.
 ```{r}
 #| echo: false
@@ -163,6 +171,8 @@ congress_data %>%
 ```
 
 Both of these figures are similar to the figures compared against number of terms, which makes sense since older representatives have most likely served more terms than younger representatives.
+
+***
 
 Next, let's look at how gender may affect the number of bills sponsored and pass percentage.
 
