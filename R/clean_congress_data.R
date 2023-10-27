@@ -30,16 +30,13 @@ congress_data <- congress_data %>%
 session_data <- congress_data %>%
   group_by(congNum, partyControl, demSeats, repSeats, otherSeats) %>%
   summarise()
+
  
 # drop unnecessary columns
 congress_data $partyControl <- NULL
 congress_data $demSeats <- NULL
 congress_data $repSeats <- NULL
 congress_data $otherSeats <-NULL
-
-#drop prcntWhite and replace it with prcntWhiteAll
-congress_data$prcntWhite <- NULL
-congress_data <- rename(congress_data, prcntWhite = "prcntWhiteAll")
 
 #save tables to data folder
 

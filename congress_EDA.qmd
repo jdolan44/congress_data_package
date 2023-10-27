@@ -1,0 +1,201 @@
+---
+title: "Congress Data EDA"
+author: "JTD"
+format: html
+---
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+
+library(tidyverse)
+library(ggthemes)
+library(patchwork)
+
+theme_set(theme_minimal(base_size = 12))
+
+#load data
+congress_data <- read_csv("data/congress_data.csv")
+
+
+```
+
+
+Let's graph the party distribution of each congress.
+```{r}
+#| echo: false
+#| warning: false
+congress_data %>%
+  ggplot(aes(x=congNum, fill=party)) +
+  geom_bar() +
+  scale_fill_manual(values=c("#5156e0", "#00aa00", "#e05151")) +
+  labs(
+    title="Party Distribution of Congress",
+    x="Congress Number",
+    y="Number of Seats",
+    fill="Party"
+       )
+```
+The party distribution does not seem to have a general trend over time.
+
+
+Next, let's look at the gender distribution.
+```{r}
+#| echo: false
+#| warning: false
+congress_data %>%
+  ggplot(aes(x=congNum, fill=gender)) +
+  geom_bar(color="black") +
+  scale_fill_manual(values=c("#e05151", "#5156e0")) +
+  labs(
+    title="Gender Distribution of Congress",
+    x="Congress Number",
+    y="Number of Seats",
+    fill="Gender"
+       )
+```
+It is clear that congress has always been majority male, but the number of female representatives has clearly increased over time.
+
+
+Next, let's look at the number of Black and Hispanic representatives over time.
+```{r}
+#| echo: false
+#| warning: false
+num_black <- congress_data %>%
+  filter(black==1) %>%
+  ggplot(aes(x=congNum, fill=party)) +
+  geom_bar(color="black") +
+  scale_fill_manual(values=c("#5156e0", "#00aa00", "#e05151")) +
+  labs(x="Congress Number", y="Black Representatives") +
+  theme(axis.title.x = element_blank())
+
+num_hispanic <- congress_data %>%
+  filter(hispanic == 1) %>%
+  ggplot(aes(x=congNum, fill=party)) +
+  geom_bar(color="black") +
+  theme(legend.position = "none") +
+  scale_fill_manual(values=c("#5156e0", "#e05151")) +
+  labs(x="Congress Number", y="Hispanic Representatives")
+
+num_black / num_hispanic
+```
+It's clear that the number of Black and Hispanic representatives has increased over time. Most Black and Hispanic representatives tend to be Democratic, which is to be expected. It also seems that Hispanic representatives have a higher likelihood to be Republican than Black representatives do. 
+
+Now let's look at how the age of congress changes over time.
+
+```{r}
+#| echo: false
+#| warning: false
+congress_data %>%
+  ggplot(aes(x=congNum, y=age)) +
+  geom_point(color="lightblue", alpha=0.5) +
+  geom_smooth(color="#512d6d",fill="darkgreen") +
+  labs(x="Congress Number",y="Age")
+```
+Surprisingly, the average age of congress seems to have gone up slightly over time. This could be because it has become more difficult for younger people to get involved in politics.
+
+Next, let's look at how the number of terms a senator has served may affect the number of bills they sponsor and/or pass.
+
+```{r}
+#| echo: false
+#| warning: false
+congress_data %>%
+  group_by(numberTerms=numberTerms%/%3) %>%
+  summarise(mean_numSpon = mean(numSpon)) %>%
+  ggplot(aes(x=factor(numberTerms*3), y=mean_numSpon)) +
+  geom_bar(stat='identity', fill="#553E4E") +
+  labs(
+    x="Number of Terms Served",
+    y="Average # of Bills Sponsored"
+  )
+
+```
+
+The above graph shows that the number of bills tends to increase by age, but it also seems to decrease as a higher number of terms is reached. This makes sense, since less experienced representatives are less likely to introduce bills. Also, senators with a large number of terms may not sponsor as many bills, since they are reaching the end of their career and their seat in the House is likely easy for them to keep even without introducing new bills.  
+
+
+```{r}
+#| echo: false
+#| warning: false
+
+congress_data %>%
+  filter(!is.na(passPrcnt)) %>%
+  group_by(numberTerms=numberTerms%/%3) %>%
+  summarise(mean_passprcnt = mean(passPrcnt)) %>%
+  ggplot(aes(x=factor(numberTerms*3), y=mean_passprcnt)) +
+  geom_bar(stat='identity', fill="#553E4E") +
+  labs(
+    x="Number of Terms Served",
+    y="Pass Percentage"
+  )
+
+```
+The plot for pass percentage seems to have an increase and decrease similar to the number of bills sponsored. However, it does not seem as obvious why pass percentage would decrease for older representatives.
+
+Now let's compare these statistics to different age groups.
+```{r}
+#| echo: false
+#| warning: false
+
+congress_data %>%
+  group_by(age=age%/%5) %>%
+  summarise(mean_numSpon = mean(numSpon)) %>%
+  ggplot(aes(x=factor(age*5), y=mean_numSpon)) +
+  geom_bar(stat='identity', fill="#553E4E") +
+  labs(x="Age Group", y="Average # of Bills Sponsored")
+```
+
+```{r}
+#| echo: false
+#| warning: false
+
+congress_data %>%
+  filter(!is.na(passPrcnt)) %>%
+  group_by(age=age%/%5) %>%
+  summarise(mean_passprcnt = mean(passPrcnt)) %>%
+  ggplot(aes(x=factor(age*5), y=mean_passprcnt)) +
+  geom_bar(stat='identity', fill="#553E4E") +
+  labs(
+    x="Age Group",
+    y="Pass Percentage"
+  )
+
+```
+
+Both of these figures are similar to the figures compared against number of terms, which makes sense since older representatives have most likely served more terms than younger representatives.
+
+Next, let's look at how gender may affect the number of bills sponsored and pass percentage.
+
+```{r}
+#| echo: false
+#| warning: false
+
+congress_data %>%
+  filter(passPrcnt>0) %>%
+  group_by(gender) %>%
+  ggplot(aes(x=gender, y=passPrcnt, color=gender)) +
+  scale_color_manual(values=c("#e05151", "#5156e0")) +
+  geom_boxplot(outlier.shape = NA, color="black") +
+  geom_jitter(width=0.35, alpha=0.2) +
+  ylim(0, 50) +
+  labs(x="", y="Pass Percentage", color="Gender")
+```
+In order to create more defined boxplots, points where the pass percentage is 0 are removed. Additionally, outlier points (where pass percentage is larger than 50%) are included but not displayed.
+
+```{r}
+#| echo: false
+#| warning: false
+congress_data %>%
+  group_by(gender) %>%
+  ggplot(aes(x=gender, y=numSpon, color=gender)) +
+  scale_color_manual(values=c("#e05151", "#5156e0")) +
+  geom_boxplot(outlier.shape = NA, color="black") +
+  geom_jitter(width=0.35, alpha=0.2) +
+  ylim(0, 50) +
+  labs(x="", y="# of Bills Sponsored", color="Gender")
+```
+
+In general, it seems that gender of the representative has very little effect on either of these variables.
+
+
+

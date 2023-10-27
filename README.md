@@ -43,6 +43,7 @@ Some large amounts of data are missing because of privacy issues. here is a list
 - medianIncome (98-113)
 - cookLeanDem (109-113)
 - prcntBlackNotHisp (98-113)
+- prcntWhite (98-113)
 
 
 ### 5. Data Cleaning
@@ -58,4 +59,3 @@ Here is a list of changes made to the raw data:
 - creates a new table for session characteristics. in the raw data, session
 characteristics are saved in every row, which is unnecessary. Session characteristics 
 are moved into a new table, `session_data`.
-- updates prcntWhite to be one column with the complete data available.

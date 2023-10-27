@@ -5,6 +5,9 @@ format: html
 editor: visual
 ---
 
+how to lose points on project: - project is difficult to clone from github. make sure there's a list of packages needed.
+
+-   check out geom_smooth.
 
 ```{r}
 #| include: false
@@ -17,63 +20,12 @@ library(ggthemes)
 theme_set(theme_minimal(base_size = 12))
 ```
 
-## Raw Data
 
-the raw data was obtained from 
-[this site](https://congressdata.joshuamccrain.com/).
-It was published in 2016 by Ella Foster-Molina, affiliated with the University of Rochester
-It contains information about each congressional district from years 1972-2013, as well as personal characteristics of the house member representing that district.
-This dataset was likely created for use in research papers.
+project notes:
 
-More information about the dataset can be found [here](codebook.pdf).
+- add writing for EDA.
+- add better labels for each plot.
 
-let's load the data:
-```{r}
-congress_data_raw <- read_csv("data/allCongressDataPublishV2.csv")
-```
-
-```{r}
-glimpse(congress_data_raw)
-```
-
-```{r}
-congress_data %>%
-  ggplot(aes(x=congNum, group=prcntWhite, fill=prcntWhite,)) +
-  geom_bar()
-```
-
-```{r}
-congress_data_raw %>%
-  filter(party=="Republican-Conservative")
-```
-```{r}
-congress_data_raw %>%
-  filter(is.na(congNum))
-```
-
-```{r}
-#save this as a new table!
-congress_data_raw %>%
-  group_by(congNum, partyControl, demSeats, repSeats, otherSeats) %>%
-  summarise()
-```
-```{r}
-congress_data%>%
-  filter(sponID==406746) %>%
-  select(party)
-
-```
-
-```{r}
-congress_data %>%
-  filter(!is.na(prcntBlackNotHisp)) %>%
-  select(congNum) %>%
-  distinct()
-```
-
-```{r}
-congress_data %>%
-  select(prcntWhite)
-```
-
-
+- do some comparisons with the party in power.
+  - is pass percentage/bills sponsored affected by the party in power? check by congress, split by party.
+  - maybe don't even need a plot, just show a table with the averages. 
