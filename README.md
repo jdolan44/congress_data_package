@@ -7,7 +7,7 @@
  
  The final presentation can be found [here](reports/presentation.qmd).
 
-##File Description:
+## File Description:
 
 The Exploratory Data Analysis for this project can be found [here](congress_data_EDA.qmd).
 
