@@ -2,6 +2,9 @@
  Author: JTD
  
  Description: data package for DS201 semester project.
+ 
+ The final report can be found [here](reports/final_report.qmd).
+ The final presentation can be found [here](reports/presentation.qmd).
 
 ##File Description:
 
