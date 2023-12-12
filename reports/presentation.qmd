@@ -1,0 +1,313 @@
+---
+title: "Congress Data Analysis"
+subtitle: "Impact of Personal Characteristics on Congressional Effectiveness"
+author: "Joseph Dolan"
+format: revealjs
+bibliography: references.bib
+---
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+#load libraries
+library(tidyverse)
+library(ggthemes)
+library(patchwork)
+library(ggplot2)
+library(ISLR2)
+library(rsample)
+library(tidymodels)
+library(kableExtra)
+
+#load data
+source("../R/clean_congress_data.R")
+set.seed(123)
+
+theme_set(theme_minimal(base_size = 12))
+congress_data <- read_csv("../data/congress_data.csv")
+```
+
+## Initial Research Question
+
+- Congress is made up of hundreds of representatives, all of who have different backgrounds.
+
+- *Do these personal characteristics have an effect on the number of bills they sponsor, or the percentage of bills they pass?*
+
+## Congressional Dataset
+
+```{r}
+#| echo: false
+congress_data %>%
+  head(5) %>%
+  kable()
+```
+[@congress_dataset]
+
+## Party Distribution of Congress Over Time
+```{r}
+#| echo: false
+#| warning: false
+congress_data %>%
+  ggplot(aes(x=congNum, fill=party)) +
+  geom_bar() +
+  scale_fill_manual(values=c("#5156e0", "#00aa00", "#e05151")) +
+  labs(
+    x="Congress Number",
+    y="Number of Seats",
+    fill="Party"
+       )
+```
+
+## Gender Distribution of Congress
+```{r}
+#| echo: false
+#| warning: false
+congress_data %>%
+  ggplot(aes(x=congNum, fill=gender)) +
+  geom_bar(color="black") +
+  scale_fill_manual(values=c("#e05151", "#5156e0")) +
+  labs(
+    x="Congress Number",
+    y="Number of Seats",
+    fill="Gender"
+       )
+```
+
+## Age of Congress Over Time
+
+```{r}
+#| echo: false
+#| warning: false
+congress_data %>%
+  ggplot(aes(x=congNum, y=age)) +
+  geom_point(color="lightblue", alpha=0.5) +
+  geom_smooth(color="#512d6d",fill="darkgreen") +
+  labs(x="Congress Number",y="Average Age")
+```
+
+## Number of Bills Sponsored v. Number of Terms Served
+```{r}
+#| echo: false
+#| warning: false
+congress_data %>%
+  group_by(numberTerms=numberTerms%/%3) %>%
+  summarise(mean_numSpon = mean(numSpon)) %>%
+  ggplot(aes(x=factor(numberTerms*3), y=mean_numSpon)) +
+  geom_bar(stat='identity', fill="#553E4E") +
+  labs(
+    x="Number of Terms Served",
+    y="Average # of Bills Sponsored"
+  )
+
+```
+
+## Pass Percentage v. Number of Terms Served
+
+```{r}
+#| echo: false
+#| warning: false
+
+congress_data %>%
+  filter(!is.na(passPrcnt)) %>%
+  group_by(numberTerms=numberTerms%/%3) %>%
+  summarise(mean_passprcnt = mean(passPrcnt)) %>%
+  ggplot(aes(x=factor(numberTerms*3), y=mean_passprcnt)) +
+  geom_bar(stat='identity', fill="#553E4E") +
+  labs(
+    x="Number of Terms Served",
+    y="Pass Percentage"
+  )
+
+```
+
+## Number of Bills Sponsored v. Age
+```{r}
+#| echo: false
+#| warning: false
+
+congress_data %>%
+  group_by(age=age%/%5) %>%
+  summarise(mean_numSpon = mean(numSpon)) %>%
+  ggplot(aes(x=factor(age*5), y=mean_numSpon)) +
+  geom_bar(stat='identity', fill="#553E4E") +
+  labs(x="Age Group", y="Average # of Bills Sponsored")
+```
+
+## Pass Percentage v. Age
+```{r}
+#| echo: false
+#| warning: false
+
+congress_data %>%
+  filter(!is.na(passPrcnt)) %>%
+  group_by(age=age%/%5) %>%
+  summarise(mean_passprcnt = mean(passPrcnt)) %>%
+  ggplot(aes(x=factor(age*5), y=mean_passprcnt)) +
+  geom_bar(stat='identity', fill="#553E4E") +
+  labs(
+    x="Age Group",
+    y="Pass Percentage"
+  )
+
+```
+## Number of Bills Sponsored v. Gender
+```{r}
+#| echo: false
+#| warning: false
+congress_data %>%
+  group_by(gender) %>%
+  ggplot(aes(x=gender, y=numSpon, color=gender)) +
+  scale_color_manual(values=c("#e05151", "#5156e0")) +
+  geom_boxplot(outlier.shape = NA, color="black") +
+  geom_jitter(width=0.35, alpha=0.2) +
+  ylim(0, 50) +
+  labs(x="", y="# of Bills Sponsored", color="Gender")
+```
+## Pass Percentage v. Gender
+```{r}
+#| echo: false
+#| warning: false
+
+congress_data %>%
+  filter(passPrcnt>0) %>%
+  group_by(gender) %>%
+  ggplot(aes(x=gender, y=passPrcnt, color=gender)) +
+  scale_color_manual(values=c("#e05151", "#5156e0")) +
+  geom_boxplot(outlier.shape = NA, color="black") +
+  geom_jitter(width=0.35, alpha=0.2) +
+  ylim(0, 50) +
+  labs(x="", y="Pass Percentage", color="Gender")
+```
+
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+library(tidyverse)
+library(tidymodels)
+#get testing data
+set.seed(123)
+
+#load data
+congress_data <- read_csv("../data/congress_data.csv")
+
+congress_data <- congress_data %>%
+  mutate(party_binary = ifelse(party=="Democrat", 1, 0),
+         gender_binary = ifelse(gender=="M", 1, 0))
+
+congress_data_split <-
+  initial_split(congress_data, prop = 0.8, strata = party)
+
+congress_data_train <- training(congress_data_split)
+
+congress_data_test <- testing(congress_data_split)
+
+#get specification
+gam_spec <- 
+  gen_additive_mod() %>%
+  set_mode("regression")
+
+#get fit for # of bills sponsored
+numspon_fit <- gam_spec %>%
+  fit(numSpon ~ s(numberTerms) + s(age) + gender_binary + party_binary, data=congress_data_train)
+
+#predict using the model
+numspon_preds <- numspon_fit %>%
+  predict(congress_data_test) %>%
+  cbind(congress_data_test)
+
+
+#get fit for pass percent
+passprcnt_fit <- gam_spec %>%
+  fit(passPrcnt ~ s(numberTerms) + s(age) + gender_binary + party_binary, data=congress_data_train)
+
+#predict using the model
+passprcnt_preds <- passprcnt_fit %>%
+  predict(congress_data_test) %>%
+  cbind(congress_data_test)
+```
+
+## Model Predictions for Number of Bills Sponsored
+- RMSE: 17.3
+```{r}
+#| echo: false
+#| message: false
+
+#compare predictions to actual
+numspon_preds %>%
+  select(numSpon, .pred)%>%
+  top_n(4)%>%
+  kbl(caption = "# of Bills Sponsored: Predictions vs Actual")
+```
+
+## Model Predictions for Pass Percentage
+- RMSE: 10.9
+```{r}
+#| echo: false
+#| message: false
+
+#compare predictions to actual
+passprcnt_preds %>%
+  select(passPrcnt, .pred)%>%
+  top_n(4)%>%
+  kbl(caption = "Pass Percentage: Predictions vs Actual")
+```
+
+## Bootstrap Estimates for Number of Bills Sponsored
+```{r}
+#| echo: false
+#| message: false
+# clean up data for ANOVA
+congress_data_for_anova <-congress_data %>%
+  filter(party!="Independent")
+
+#-----numSpon-----
+
+#model formula
+numSpon_lm <-
+  lm(numSpon ~ numberTerms + age + gender + party, data = congress_data_for_anova)
+
+#get intervals
+numSpon_intervals <- 
+  reg_intervals(numSpon ~ numberTerms + age + gender + party, data = congress_data_for_anova, times = 500)
+
+#plot estimates
+numSpon_intervals %>%
+  ggplot(aes(.estimate, term)) +
+  geom_vline(xintercept = 0, linewidth = 1.5, lty = 2, color = "gray50") +
+  geom_errorbar(linewidth = 1.4, alpha = 0.7,
+                aes(xmin = .lower, xmax = .upper)) +
+  geom_point(size = 3)
+```
+
+## Bootstrap Estimates for Pass Percentage
+```{r}
+#| echo: false
+#| message: false
+#-----passPrcnt-----
+
+#model formula
+passPrcnt_lm <-
+  lm(passPrcnt ~ numberTerms + age + gender + party, data = congress_data_for_anova)
+
+#get intervals
+passPrcnt_intervals <- 
+  reg_intervals(passPrcnt ~ numberTerms + age + gender + party, data = congress_data_for_anova, times = 500)
+
+#plot estimates
+passPrcnt_intervals %>%
+  ggplot(aes(.estimate, term)) +
+  geom_vline(xintercept = 0, linewidth = 1.5, lty = 2, color = "gray50") +
+  geom_errorbar(linewidth = 1.4, alpha = 0.7,
+                aes(xmin = .lower, xmax = .upper)) +
+  geom_point(size = 3)
+```
+
+## Conclusions
+
+- There is a lack of evidence that personal characteristics affect effectiveness in congress.
+
+- Further research could investigate other possible predictors, such as demographics of each district.
+
+## References

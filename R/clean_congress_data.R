@@ -4,7 +4,7 @@ library(ggthemes)
 theme_set(theme_minimal(base_size = 12))
 
 # read from the raw data file.
-congress_data <- read_csv("raw_data/allCongressDataPublishV2.csv")
+congress_data <- read_csv("../raw_data/allCongressDataPublishV2.csv")
 
 #found 8 rows where the majority of major variables are missing.
 #all of them can be found with is.na(state)
@@ -40,7 +40,7 @@ congress_data $otherSeats <-NULL
 
 #save tables to data folder
 
-write_csv(congress_data, "data/congress_data.csv")
-write_csv(session_data, "data/session_data.csv")
+write_csv(congress_data, "../data/congress_data.csv")
+write_csv(session_data, "../data/session_data.csv")
  
 

@@ -21,7 +21,7 @@ It was published in 2016 by Ella Foster-Molina, affiliated with the University o
 
 It contains census data on each congressional district from years 1972-2013, as well as personal characteristics of the house member representing that district.
 
-More information about the dataset can be found [here](raw_data/codebook.pdf), along with a codebook for the raw data.
+More information about the raw dataset can be found [here](raw_data/codebook.pdf), along with a codebook for the raw data.
 
 ### 2. Data Format
 
@@ -56,7 +56,7 @@ Some large amounts of data are missing because of privacy issues. here is a list
 
 ### 5. Data Cleaning
 
-The cleaning script used for the data can be found [here](R/clean_congress_data.R).
+The cleaning script used for the data can be found [here](../R/clean_congress_data.R).
 
 The script pulls the raw data and saves the new tables to the `data` folder.
 

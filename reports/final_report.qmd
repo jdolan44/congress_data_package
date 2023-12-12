@@ -1,0 +1,377 @@
+---
+title: "Congress Data Report"
+author: "Joseph Dolan"
+format: html
+bibliography: references.bib
+---
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+#load libraries
+library(tidyverse)
+library(ggthemes)
+library(patchwork)
+library(ggplot2)
+library(ISLR2)
+library(rsample)
+library(tidymodels)
+library(kableExtra)
+
+#load data
+source("../R/clean_congress_data.R")
+set.seed(123)
+
+theme_set(theme_minimal(base_size = 12))
+congress_data <- read_csv("../data/congress_data.csv")
+```
+
+
+## Executive Summary
+
+The goal of this project is to observe how one's congressional effectiveness is impacted by their personal characteristics. Using various models to predict and infer effectiveness based on various personal characteristics, there is a lack of evidence that any of these characteristics affect a representative's number of bills sponsored and their percentage of passing bills.
+
+## Data Collection
+
+the raw data is freely available to the public, obtained from 
+[this site](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/CI2EPI).
+It was published in 2017 by Ella Foster-Molina, affiliated with the University of Rochester. [@congress_dataset]
+
+It contains census data on each congressional district from years 1972-2013, as well as personal characteristics of the house member representing that district.
+
+More information about the raw dataset can be found at [raw_data/codebook.pdf](../raw_data/codebook.pdf), along with a codebook for the raw data.
+
+For many different reasons, certain columns are missing data for certain sessions of congress, but none of these columns are used in analysis.
+
+This data has been cleaned using the following script: [R/clean_congress_data.R](../R/clean_congress_data.R). A few of the rows seem to be corrupted, missing any relevant information. Additionally, some entries are modified to be more consistent. More information on the cleaning can be found in the script. 
+
+The cleaned dataset has the following structure:
+```{r}
+#| echo: false
+congress_data %>%
+  head(5) %>%
+  kable()
+```
+## Exploratory Data Analysis
+
+The following plot shows the party distribution of congress over time.
+```{r}
+#| echo: false
+#| warning: false
+congress_data %>%
+  ggplot(aes(x=congNum, fill=party)) +
+  geom_bar() +
+  scale_fill_manual(values=c("#5156e0", "#00aa00", "#e05151")) +
+  labs(
+    title="Party Distribution of Congress Over Time",
+    x="Congress Number",
+    y="Number of Seats",
+    fill="Party"
+       )
+```
+Based on the plot, the party distribution seems to be mostly even, and neither party has had an overall increase or decrease in numbers over the entire dataset. 
+
+***
+
+Next, let's look at the gender distribution.
+```{r}
+#| echo: false
+#| warning: false
+congress_data %>%
+  ggplot(aes(x=congNum, fill=gender)) +
+  geom_bar(color="black") +
+  scale_fill_manual(values=c("#e05151", "#5156e0")) +
+  labs(
+    title="Gender Distribution of Congress",
+    x="Congress Number",
+    y="Number of Seats",
+    fill="Gender"
+       )
+```
+It is clear that congress has always been majority male, but the number of female representatives has certainly increased over time.
+
+***
+
+Now let's look at how the age of congress changes over time.
+
+```{r}
+#| echo: false
+#| warning: false
+congress_data %>%
+  ggplot(aes(x=congNum, y=age)) +
+  geom_point(color="lightblue", alpha=0.5) +
+  geom_smooth(color="#512d6d",fill="darkgreen") +
+  labs(x="Congress Number",y="Age")
+```
+Surprisingly, the average age of congress seems to have gone up slightly over time. This could be because it has become more difficult for younger people to get involved in politics.
+
+***
+
+Next, let's look at how the number of terms a senator has served may affect the number of bills they sponsor and/or pass.
+
+```{r}
+#| echo: false
+#| warning: false
+congress_data %>%
+  group_by(numberTerms=numberTerms%/%3) %>%
+  summarise(mean_numSpon = mean(numSpon)) %>%
+  ggplot(aes(x=factor(numberTerms*3), y=mean_numSpon)) +
+  geom_bar(stat='identity', fill="#553E4E") +
+  labs(
+    x="Number of Terms Served",
+    y="Average # of Bills Sponsored"
+  )
+
+```
+
+The above graph shows that the number of bills tends to increase by age, but it also seems to decrease as a higher number of terms is reached. This makes sense, since less experienced representatives are less likely to introduce bills. Also, senators with a large number of terms may not sponsor as many bills, since they are reaching the end of their career and their seat in the House is likely easy for them to keep even without introducing new bills.  
+
+
+```{r}
+#| echo: false
+#| warning: false
+
+congress_data %>%
+  filter(!is.na(passPrcnt)) %>%
+  group_by(numberTerms=numberTerms%/%3) %>%
+  summarise(mean_passprcnt = mean(passPrcnt)) %>%
+  ggplot(aes(x=factor(numberTerms*3), y=mean_passprcnt)) +
+  geom_bar(stat='identity', fill="#553E4E") +
+  labs(
+    x="Number of Terms Served",
+    y="Pass Percentage"
+  )
+
+```
+The plot for pass percentage seems to have an increase and decrease similar to the number of bills sponsored. However, it does not seem as obvious why pass percentage would decrease for older representatives.
+
+***
+
+Now let's compare these statistics to different age groups.
+```{r}
+#| echo: false
+#| warning: false
+
+congress_data %>%
+  group_by(age=age%/%5) %>%
+  summarise(mean_numSpon = mean(numSpon)) %>%
+  ggplot(aes(x=factor(age*5), y=mean_numSpon)) +
+  geom_bar(stat='identity', fill="#553E4E") +
+  labs(x="Age Group", y="Average # of Bills Sponsored")
+```
+
+```{r}
+#| echo: false
+#| warning: false
+
+congress_data %>%
+  filter(!is.na(passPrcnt)) %>%
+  group_by(age=age%/%5) %>%
+  summarise(mean_passprcnt = mean(passPrcnt)) %>%
+  ggplot(aes(x=factor(age*5), y=mean_passprcnt)) +
+  geom_bar(stat='identity', fill="#553E4E") +
+  labs(
+    x="Age Group",
+    y="Pass Percentage"
+  )
+
+```
+
+Both of these figures are similar to the figures compared against number of terms, which makes sense since older representatives have most likely served more terms than younger representatives.
+
+***
+
+Next, let's look at how gender may affect the number of bills sponsored and pass percentage.
+
+```{r}
+#| echo: false
+#| warning: false
+
+congress_data %>%
+  filter(passPrcnt>0) %>%
+  group_by(gender) %>%
+  ggplot(aes(x=gender, y=passPrcnt, color=gender)) +
+  scale_color_manual(values=c("#e05151", "#5156e0")) +
+  geom_boxplot(outlier.shape = NA, color="black") +
+  geom_jitter(width=0.35, alpha=0.2) +
+  ylim(0, 50) +
+  labs(x="", y="Pass Percentage", color="Gender")
+```
+In order to create more defined boxplots, points where the pass percentage is 0 are removed. Additionally, outlier points (where pass percentage is larger than 50%) are included but not displayed.
+
+```{r}
+#| echo: false
+#| warning: false
+congress_data %>%
+  group_by(gender) %>%
+  ggplot(aes(x=gender, y=numSpon, color=gender)) +
+  scale_color_manual(values=c("#e05151", "#5156e0")) +
+  geom_boxplot(outlier.shape = NA, color="black") +
+  geom_jitter(width=0.35, alpha=0.2) +
+  ylim(0, 50) +
+  labs(x="", y="# of Bills Sponsored", color="Gender")
+```
+
+In general, it seems that gender of the representative has very little effect on either of these variables.
+
+To further asses how these variables affect the number of bills and pass percentage, we will create various regression models.
+ 
+## Models
+
+For this data, we will use two different types of models to analyze the affect of personal characteristics on pass percentage and number of bills sponsored. The first we will use is a Generalized Additive Model, a type of regression which shows how well the variables can predict pass percentage and number of bills sponsored for any given representative. Second, we will use bootstrap resampling to better isolate our predictors and see how each causes variance in a representative's effectiveness.
+
+## Model Results
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+library(tidyverse)
+library(tidymodels)
+#get testing data
+set.seed(123)
+
+#load data
+congress_data <- read_csv("../data/congress_data.csv")
+
+congress_data <- congress_data %>%
+  mutate(party_binary = ifelse(party=="Democrat", 1, 0),
+         gender_binary = ifelse(gender=="M", 1, 0))
+
+congress_data_split <-
+  initial_split(congress_data, prop = 0.8, strata = party)
+
+congress_data_train <- training(congress_data_split)
+
+congress_data_test <- testing(congress_data_split)
+
+#get specification
+gam_spec <- 
+  gen_additive_mod() %>%
+  set_mode("regression")
+
+#get fit for # of bills sponsored
+numspon_fit <- gam_spec %>%
+  fit(numSpon ~ s(numberTerms) + s(age) + gender_binary + party_binary, data=congress_data_train)
+
+#predict using the model
+numspon_preds <- numspon_fit %>%
+  predict(congress_data_test) %>%
+  cbind(congress_data_test)
+
+
+#get fit for pass percent
+passprcnt_fit <- gam_spec %>%
+  fit(passPrcnt ~ s(numberTerms) + s(age) + gender_binary + party_binary, data=congress_data_train)
+
+#predict using the model
+passprcnt_preds <- passprcnt_fit %>%
+  predict(congress_data_test) %>%
+  cbind(congress_data_test)
+```
+
+### Generalized Additive Models
+
+##### Number of Bills Sponsored:
+```{r}
+#| echo: false
+#| message: false
+#find the RMSE
+numspon_preds %>% 
+  rmse(truth = numSpon, estimate = .pred)%>%
+  select(.metric, .estimate) %>%
+  kbl()
+
+#compare predictions to actual
+numspon_preds %>%
+  select(numSpon, .pred)%>%
+  top_n(10)%>%
+  kbl(caption = "# of Bills Sponsored: Predictions vs Actual")
+```
+It seems the results of this model are not very promising. In the first table, the RMSE value of 17.3 means that our regression model is off by an average of 17.3 bills for each representative it predicted. In the table below it, we can see that the model always seems to guess that the number of bills sponsored is around 23, likely the average number of bills sponsored by each representative.
+
+##### Pass Percentage:
+
+```{r}
+#| echo: false
+#| message: false
+
+#find the RMSE
+passprcnt_preds %>% 
+  rmse(truth = passPrcnt, estimate = .pred)%>%
+  select(.metric, .estimate) %>%
+  kbl()
+
+#compare predictions to actual
+passprcnt_preds %>%
+  select(passPrcnt, .pred)%>%
+  top_n(10)%>%
+  kbl(caption = "Pass Percentage: Predictions vs Actual")
+```
+
+Unfortunately, the GAM model for pass percentage also shares this flaw. the RMSE shows us that the model is off by an average of 10% in predicting the pass percentage of a representative. Also, looking at the first few rows, the model always seems to guess in the range of 13-14 percent.
+
+### Bootstrap Estimates
+
+##### Number of Bills Sponsored:
+```{r}
+#| echo: false
+#| message: false
+# clean up data for ANOVA
+congress_data_for_anova <-congress_data %>%
+  filter(party!="Independent")
+
+#-----numSpon-----
+
+#model formula
+numSpon_lm <-
+  lm(numSpon ~ numberTerms + age + gender + party, data = congress_data_for_anova)
+
+#get intervals
+numSpon_intervals <- 
+  reg_intervals(numSpon ~ numberTerms + age + gender + party, data = congress_data_for_anova, times = 500)
+
+#plot estimates
+numSpon_intervals %>%
+  ggplot(aes(.estimate, term)) +
+  geom_vline(xintercept = 0, linewidth = 1.5, lty = 2, color = "gray50") +
+  geom_errorbar(linewidth = 1.4, alpha = 0.7,
+                aes(xmin = .lower, xmax = .upper)) +
+  geom_point(size = 3)
+```
+This bootstrap model gives us a better representation of how each variable impacts the number of bills sponsored on average. This model implies that on average, republicans sponsor somewhere from 2-3 bills less than members of other parties. For the number of terms, there seems to be a slight impact, but less than 1 bill more on average does not seem very statistically significant. Similarly, the variance in age is so small that it's hard to say there is a statistical difference. As for gnder, the margin of error is so high that the model cannot determine for sure whether men or women sponsor more bills on average. 
+
+##### Pass Percentage:
+
+```{r}
+#| echo: false
+#| message: false
+#-----passPrcnt-----
+
+#model formula
+passPrcnt_lm <-
+  lm(passPrcnt ~ numberTerms + age + gender + party, data = congress_data_for_anova)
+
+#get intervals
+passPrcnt_intervals <- 
+  reg_intervals(passPrcnt ~ numberTerms + age + gender + party, data = congress_data_for_anova, times = 500)
+
+#plot estimates
+passPrcnt_intervals %>%
+  ggplot(aes(.estimate, term)) +
+  geom_vline(xintercept = 0, linewidth = 1.5, lty = 2, color = "gray50") +
+  geom_errorbar(linewidth = 1.4, alpha = 0.7,
+                aes(xmin = .lower, xmax = .upper)) +
+  geom_point(size = 3)
+```
+In the bootstrap model for pass percentage, our predictors also do not show much statistical significance. For gender, men seem to pass bills around 1% more of the time, but this does not seem significant. As for the other three predictors, either the difference is too close to 0 or the error bars cross 0, which means the model cannot determine any difference for certain. 
+
+## Conclusions
+
+This report aims to show how personal characteristics affect the effectiveness of members of the house of representatives. The main predictors used for assessment were the age of the representative, the number of terms served, their gender, and their party. To assess their effectiveness, we analyzed the number of bills sponsored and the pass percentage of a representative's bills. 
+
+After analyzing the previous models, our results are inconclusive. None of the models developed have adequately shown that any of these predictors affect congressional effectiveness. To further improve this model, one would likely need a different measure for congressional effectiveness. There is simply too much variance in the number of bills sponsored and pass percentage. Some representatives may sponsor hundreds of bills, while others only sponsor one of two. Similarly, some representatives may have a 100% pass percentage but only sponsored one bill, or have a really low pass percentage but have sponsored hundreds. 
+
+One aspect that was not analyzed was the data on the residents of each district. Perhaps future research could analyze how demographics of specific districts affect the liklihood of that district being effective in congress.
+
+

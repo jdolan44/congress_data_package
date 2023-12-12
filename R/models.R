@@ -21,7 +21,7 @@ gam_spec <-
 
 #get fit for # of bills sponsored
 numspon_fit <- gam_spec %>%
-  fit(numSpon ~ s(numberTerms, age, gender_binary, party_binary, k=20),data=congress_data_train)
+  fit(numSpon ~ s(numberTerms) + s(age) + gender_binary + party_binary, data=congress_data_train)
 
 #predict using the model
 numspon_preds <- numspon_fit %>%
@@ -42,7 +42,7 @@ numspon_preds %>%
 
 #get fit for pass percent
 passprcnt_fit <- gam_spec %>%
-  fit(passPrcnt ~ s(numberTerms, age, gender_binary, party_binary, k=20),data=congress_data_train)
+  fit(passPrcnt ~ s(numberTerms) + s(age) + gender_binary + party_binary, data=congress_data_train)
 
 #predict using the model
 passprcnt_preds <- passprcnt_fit %>%
@@ -57,6 +57,6 @@ passprcnt_preds %>%
   rmse(truth = passPrcnt, estimate = .pred)
 
 #compare predictions to actual
-numspon_preds %>%
+passprcnt_preds %>%
   select(passPrcnt, .pred)
 
